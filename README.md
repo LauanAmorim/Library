@@ -1,6 +1,6 @@
 # Library
 
-![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
+![GitHub repo size](https://img.shields.io/github/repo-size/LauanAmorim/Library)
 
 > Esse projeto foi feito com o objetivo de desenvolver e praticar conceitos de Clean Architeture, DDD, CQRS, Mediator e Repository.
 
