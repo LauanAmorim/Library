@@ -64,7 +64,7 @@ namespace Library.API.Controllers
         /// <summary>
         /// Soft-delete a book by it's Id
         /// </summary>
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid? id, CancellationToken cancellationToken)
         {
             if (id is null) return BadRequest();
