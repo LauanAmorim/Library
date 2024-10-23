@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Library.API.Controllers;
 using Library.Application.UseCases.Commands.CreateBook;
+using Library.Domain.Enums;
 using Library.Domain.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace Library.Tests.Unit.src.Library.API
             _mediatorMock = new Mock<IMediator>();
             _controller = new BookController(_mediatorMock.Object);
         }
-
+    
         [Fact]
         public async Task Create_Should_Return_Ok_With_CreateBookResponse()
         {
@@ -43,7 +44,7 @@ namespace Library.Tests.Unit.src.Library.API
                 Author = "Teste Autor",
                 Isbn = new ISBN("1234567890"),
                 ReleaseDate = DateTime.Now,
-                Status = Domain.Enums.EntityStatus.Active,
+                Status = EntityStatus.Active,
             };
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<CreateBookRequest>(), It.IsAny<CancellationToken>()))
