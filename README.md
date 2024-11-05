@@ -17,8 +17,8 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- Você instalou o .NET 8.
-- Você leu o guia de instalação do projeto.
+- SDK do .NET 8.
+- Ler o guia de instalação do projeto.
 
 ## 🚀 Instalando o projeto Library
 
