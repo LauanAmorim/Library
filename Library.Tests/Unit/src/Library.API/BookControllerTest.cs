@@ -24,7 +24,7 @@ namespace Library.Tests.Unit.src.Library.API
             _mediatorMock = new Mock<IMediator>();
             _controller = new BookController(_mediatorMock.Object);
         }
-    
+
         [Fact]
         public async Task Create_Should_Return_Ok_With_CreateBookResponse()
         {
@@ -61,13 +61,13 @@ namespace Library.Tests.Unit.src.Library.API
             _mediatorMock.Verify(m => m.Send(It.Is<CreateBookRequest>(r => r == request), It.IsAny<CancellationToken>()), Times.Once);
         }
         [Fact]
-        public async Task Create_Should_Return_BadRequest_With_CreateBookResponse()
+        public async Task Create_Should_Return_BadRequest_With_CreateBookRequest_NoTitle()
         {
             // Arrange
             var request = new CreateBookRequest
             (
-                "Teste Tiulo",
                 "",
+                "Teste Autor",
                 new ISBN("1234567890"),
                 DateTime.Now
             );
@@ -79,6 +79,33 @@ namespace Library.Tests.Unit.src.Library.API
             var badRequestResult = result.Result as BadRequestObjectResult;
             badRequestResult.Should().NotBeNull();
             badRequestResult?.StatusCode.Should().Be(400);
+        }
+        [Fact]
+        public async Task Create_InvalidRequest_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var request = new CreateBookRequest("", "Valid Author", new ISBN("1234567890123"), DateTime.Now);
+
+            // Act
+            var result = await _controller.Create(request, CancellationToken.None);
+
+            // Assert
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(400);
+            badRequestResult.Value.Should().Be("Invalid request data");
+        }
+
+        [Fact]
+        public async Task Create_MediatorThrowsException_ShouldThrowException()
+        {
+            // Arrange
+            var request = new CreateBookRequest("Valid Title", "Valid Author", new ISBN("1234567890123"), DateTime.Now);
+
+            _mediatorMock.Setup(m => m.Send(request, It.IsAny<CancellationToken>())).ThrowsAsync(new Exception("Mediator failed"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _controller.Create(request, CancellationToken.None));
         }
     }
 }
