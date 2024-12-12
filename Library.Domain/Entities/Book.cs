@@ -20,7 +20,6 @@ namespace Library.Domain.Entities
         public string? Author { get; set; }
         public DateTime? ReleaseDate { get;  set; }
 
-        protected Book() { }
         public static Book Create(string title, string author, ISBN isbn, DateTime ReleaseDate)
         {
             //ValidateBookData(title, author, isbn, ReleaseDate);

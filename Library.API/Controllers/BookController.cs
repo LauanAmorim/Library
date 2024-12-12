@@ -45,6 +45,7 @@ namespace Library.API.Controllers
         {
             if (id != request.Id) return BadRequest();
             var response = await _mediator.Send(request, cancellationToken);
+            if (response == null) return NotFound();
             return Ok(response);
         }
         /// <summary>
@@ -70,6 +71,7 @@ namespace Library.API.Controllers
             if (id is null) return BadRequest();
             var deleteBookRequest = new DeleteBookRequest(id.Value);
             var response = await _mediator.Send(deleteBookRequest, cancellationToken);
+            if (response is null) return NotFound();
             return Ok(response);
         }
         /// <summary>

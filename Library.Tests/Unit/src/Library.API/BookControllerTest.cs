@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Library.API.Controllers;
 using Library.Application.UseCases.Commands.CreateBook;
+using Library.Application.UseCases.Commands.DeleteBook;
+using Library.Application.UseCases.Commands.UpdateBook;
 using Library.Domain.Enums;
 using Library.Domain.ValueObjects;
 using MediatR;
@@ -107,5 +109,125 @@ namespace Library.Tests.Unit.src.Library.API
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _controller.Create(request, CancellationToken.None));
         }
+
+        [Fact]
+        public async Task Delete_Should_Return_Ok_With_Response_When_BookIsDeleted()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var response = new DeleteBookResponse
+            {
+                Id = bookId,
+                Title = "Sample Title",
+                Author = "Sample Author",
+                Isbn = new ISBN("1234567890"),
+                Status = EntityStatus.Active,
+                ReleaseDate = DateTime.Now
+            };
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteBookRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.Delete(bookId, CancellationToken.None);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result as OkObjectResult;
+            okResult!.Value.Should().BeEquivalentTo(response);
+
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteBookRequest>(r => r.Id == bookId), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Delete_Should_Return_BadRequest_When_IdIsNull()
+        {
+            // Arrange
+            Guid? bookId = null;
+
+            // Act
+            var result = await _controller.Delete(bookId, CancellationToken.None);
+
+            // Assert
+            result.Should().BeOfType<BadRequestResult>();
+            _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteBookRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Delete_Should_Return_NotFound_When_BookDoesNotExist()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteBookRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((DeleteBookResponse?)null);
+
+            // Act
+            var result = await _controller.Delete(bookId, CancellationToken.None);
+
+            // Assert
+            result.Should().BeOfType<NotFoundResult>();
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteBookRequest>(r => r.Id == bookId), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Update_Should_Return_BadRequest_When_Id_Does_Not_Match_Request()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var request = new UpdateBookRequest(Guid.NewGuid(), "Title", "Author", DateTime.UtcNow);
+
+            // Act
+            var result = await _controller.Update(id, request, CancellationToken.None);
+
+            // Assert
+            result.Result.Should().BeOfType<BadRequestResult>();
+        }
+
+        [Fact]
+        public async Task Update_Should_Return_Ok_When_Book_Is_Updated()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var request = new UpdateBookRequest(id, "Title", "Author", DateTime.UtcNow);
+            var response = new UpdateBookResponse
+            {
+                Id = id,
+                Title = "Updated Title",
+                Author = "Updated Author",
+                ReleaseDate = DateTime.UtcNow
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.Update(id, request, CancellationToken.None);
+
+            // Assert
+            result.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeEquivalentTo(response);
+        }
+
+        [Fact]
+        public async Task Update_Should_Return_NotFound_When_Book_Does_Not_Exist()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var request = new UpdateBookRequest(id, "Title", "Author", DateTime.UtcNow);
+
+            _mediatorMock
+                .Setup(m => m.Send(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((UpdateBookResponse)null);
+
+            // Act
+            var result = await _controller.Update(id, request, CancellationToken.None);
+
+            // Assert
+            result.Result.Should().BeOfType<NotFoundResult>();
+        }
+
+
     }
 }
