@@ -39,7 +39,7 @@ namespace Library.Tests.Unit.src.Library.Application.UseCases.Commands
         {
             // Arrange
             var request = new CreateBookRequest("Sample Title", "Sample Author", new ISBN("1234567890123"), DateTime.Now);
-            var book = new Book(); // entidade mapeada
+            var book = new Book();
 
             _mockMapper.Setup(m => m.Map<Book>(request)).Returns(book);
             _mockMapper.Setup(m => m.Map<CreateBookResponse>(book)).Returns(new CreateBookResponse());

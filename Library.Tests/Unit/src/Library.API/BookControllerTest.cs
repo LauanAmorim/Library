@@ -2,6 +2,7 @@
 using Library.API.Controllers;
 using Library.Application.UseCases.Commands.CreateBook;
 using Library.Application.UseCases.Commands.DeleteBook;
+using Library.Application.UseCases.Commands.RestoreBook;
 using Library.Application.UseCases.Commands.UpdateBook;
 using Library.Domain.Enums;
 using Library.Domain.ValueObjects;
@@ -228,6 +229,51 @@ namespace Library.Tests.Unit.src.Library.API
             result.Result.Should().BeOfType<NotFoundResult>();
         }
 
+        [Fact]
+        public async Task Restore_Should_Return_Ok_When_Book_Is_Restored()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var response = new RestoreBookResponse
+            {
+                Id = bookId,
+                Title = "Restored Book",
+                Author = "Restored Author",
+                Isbn = new ISBN("1234567890"),
+                Status = EntityStatus.Active,
+                ReleaseDate = DateTime.Now
+            };
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreBookRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.Restore(bookId, CancellationToken.None);
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            var okResult = result as OkObjectResult;
+            okResult!.Value.Should().BeEquivalentTo(response);
+
+            _mediatorMock.Verify(m => m.Send(It.Is<RestoreBookRequest>(r => r.Id == bookId), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task Restore_Should_Return_NotFound_When_Book_Does_Not_Exist()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreBookRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((RestoreBookResponse?)null);
+
+            // Act
+            var result = await _controller.Restore(bookId, CancellationToken.None);
+
+            // Assert
+            result.Should().BeOfType<NotFoundResult>();
+            _mediatorMock.Verify(m => m.Send(It.Is<RestoreBookRequest>(r => r.Id == bookId), It.IsAny<CancellationToken>()), Times.Once);
+        }
 
     }
 }

@@ -13,7 +13,7 @@ namespace Library.Domain.Entities
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset? ModifiedAt { get; protected set; }
         public DateTimeOffset? DeletedAt { get; protected set; }
-        public EntityStatus Status { get; protected set; }
+        public EntityStatus Status { get; set; }
 
         protected BaseEntity()
         {
